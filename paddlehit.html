@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Gamedev Canvas Workshop</title>
+    <style>
+    	* { padding: 0; margin: 0; }
+    	canvas { background: black; display: block; margin: 0 auto; }
+    </style>
+</head>
+<body>
+
+<canvas id="myCanvas" width="1200" height="600"></canvas>
+
+<script>
+
+
+var canvas = document.getElementById("myCanvas");
+var ctx = canvas.getContext("2d");
+var ballRadius = 10;
+var x = canvas.width/2;
+var y = canvas.height-30;
+var dx = 2;
+var dy = -2;
+var paddleHeight = 10;
+var paddleWidth = 75;
+var paddleX = (canvas.width-paddleWidth)/2;
+var rightPressed = false;
+var leftPressed = false;
+var r = 15;
+var c = 10;
+var brickWidth = 75;
+var brickHeight = 20;
+var brickPadding = 10;
+var brickOffsetTop = 30;
+var brickOffsetLeft = 30;var xx,yy;
+var flag;
+var ballstatus=1;
+
+
+var bricks = [];
+for(i=0; i<r; i++) {
+    bricks[i] = [];
+    for(j=0; j<c; j++) {
+        bricks[i][j] = { xx: 0, yy: 0, flag: 1 };
+    }
+}
+
+// for sake of convieniece we used r as column and c as row
+
+document.addEventListener("keydown", keyDownHandler, false);
+document.addEventListener("keyup", keyUpHandler, false);
+
+
+function keyDownHandler(e) {
+    if(e.keyCode == 39) {
+        rightPressed = true;
+    }
+    else if(e.keyCode == 37) {
+        leftPressed = true;
+    }
+}
+function keyUpHandler(e) {
+    if(e.keyCode == 39) {
+        rightPressed = false;
+    }
+    else if(e.keyCode == 37) {
+        leftPressed = false;
+    }
+}
+
+
+//var colo2 = "yellow";
+
+function drawBall() {
+    ctx.beginPath();
+    ctx.arc(x, y, ballRadius, 0, Math.PI*2);
+    if(ballstatus === 1)
+    ctx.fillStyle = "red";
+    else {
+    ctx.fillStyle = "yellow";
+    }
+    ctx.fill();
+    ctx.closePath();
+}
+
+function drawPaddle() {
+    ctx.beginPath();
+    ctx.rect(paddleX, canvas.height-paddleHeight, paddleWidth, paddleHeight);
+    ctx.fillStyle = "#0095DD";
+    ctx.fill();
+    ctx.closePath();
+}
+
+function drawBricks() {
+    for(i=0; i<r; i++) {
+        for(j=0; j<c; j++) {
+           if(bricks[i][j].flag === 1){
+            var brickX = (i*(brickWidth+2)+2);
+            var brickY = (j*(brickHeight+2)+2);
+            bricks[i][j].xx = brickX;
+            bricks[i][j].yy = brickY;
+            ctx.beginPath();
+            ctx.rect(brickX, brickY, brickWidth, brickHeight);
+            ctx.fillStyle = "#0095DD";
+            ctx.fill();
+            ctx.closePath();}
+        }
+    }
+}
+
+function collisiondetection(){
+
+var score=0;
+for(i=0; i<r; i++)
+{
+  for(j=0; j<c ;j++)
+  {
+    var obj=bricks[i][j];
+    if(obj.flag === 1){
+    if(x-ballRadius>obj.xx && x+ballRadius<obj.xx+brickWidth && y-ballRadius === obj.yy+brickHeight)
+    {dy=-dy;obj.flag=0;ballstatus=1-ballstatus;score++;}
+    //if(x-ballRadius > obj.xx+brickWidth && y-ballRadius>=obj.yy && y+ballRadius<obj.yy+brickHeight)
+    //{dx=-dx;obj.flag=0;}
+  }
+  }
+}
+}
+
+// for this we are using three methods font(),fillStyle() and filltext()
+
+function countscore()
+{
+  ctx.font = "16px Ariel";// size of the font and the font style
+  ctx.fillStyle = "purple";// color of the font
+  ctx.fillText("score: "+ score, 10, 10);// x,y coordinates of the font to display
+}
+
+
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawBricks();
+    drawBall();
+    drawPaddle();
+  //  countscore();
+    collisiondetection();
+
+
+    if(x + dx > canvas.width-ballRadius || x + dx < ballRadius) {
+        dx = -dx;
+    }
+    if(y + dy < ballRadius) {
+        dy = -dy;
+    }
+    else if(y + dy > canvas.height-ballRadius) {
+        if(x > paddleX && x < paddleX + paddleWidth) {
+           if(y= y-paddleHeight){
+            dy = -dy  ;
+			 }
+        }
+        else {
+            alert("GAME OVER");
+            document.location.reload();
+        }
+    }
+
+    if(rightPressed && paddleX < canvas.width-paddleWidth) {
+        paddleX += 7;
+    }
+    else if(leftPressed && paddleX > 0) {
+        paddleX -= 7;
+    }
+
+    x += dx;
+    y += dy;
+}
+
+setInterval(draw, 10); // all the frames should be laoded in milliseconds
+
+</script>
+
+</body>
+</html>
